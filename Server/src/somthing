@@ -1,0 +1,116 @@
+DatagramChannel s = DatagramChannel.open();
+        InetSocketAddress iAdd = new InetSocketAddress(MyConstant.HOST, MyConstant.PORT);
+        s.bind(iAdd);
+        s.configureBlocking(false);
+        public Request getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {
+                FileOutputStream fileOutput;
+                FileInputStream fileInput;
+                ObjectInputStream objectInput;
+
+                ByteBuffer buffer1 = ByteBuffer.allocate(MyConstant.SIZE);
+                client = datagramChannel.receive(buffer1);
+                buffer1.flip();
+                int limits = buffer1.limit();
+
+                ByteBuffer buffer2 = ByteBuffer.allocate(limits);
+                datagramChannel.receive(buffer2);
+                byte[] bytes = new byte[limits];
+                buffer2.get(bytes, 0, limits);
+
+                fileOutput = new FileOutputStream(file);
+
+                fileOutput.write(bytes);
+
+                fileInput = new FileInputStream(file);
+                objectInput = new ObjectInputStream(fileInput);
+
+                Request request = (Request) objectInput.readObject();
+
+                objectInput.close();
+                fileInput.close();
+                fileOutput.close();
+
+                return request;
+            }
+
+            public void sendLetter(Request send, DatagramChannel datagramChannel) throws IOException {
+                FileOutputStream fileOutput;
+                FileInputStream fileInput;
+                ObjectOutputStream objectOut;
+
+                fileOutput = new FileOutputStream(file);
+                objectOut = new ObjectOutputStream(fileOutput);
+
+                objectOut.writeObject(send);
+
+                fileInput = new FileInputStream(file);
+                byte[] request = new byte[(int)file.length()];
+                fileInput.read(request);
+
+                byte[] letterSize = Useful.convertToByte(request.length);
+                datagramChannel.send(ByteBuffer.wrap(letterSize), client);
+
+                datagramChannel.send(ByteBuffer.wrap(request), client);
+
+                objectOut.close();
+                fileInput.close();
+                fileOutput.close();
+            }
+
+            /* public Request getLetter(DatagramSocket datagramSocket) throws IOException, ClassNotFoundException {
+                    FileOutputStream fileOutput;
+                    FileInputStream fileInput;
+                    ObjectInputStream objectInput;
+
+                    byte[] length = new byte[MyConstant.SIZE];
+                    DatagramPacket letterSize = new DatagramPacket(length, length.length);
+                    datagramSocket.receive(letterSize);
+
+                    byte[] req = new byte[Useful.convertToInt(length)];
+                    DatagramPacket inputRequest = new DatagramPacket(req, req.length);
+                    datagramSocket.receive(inputRequest);
+
+                    fileOutput = new FileOutputStream(file);
+
+                    fileOutput.write(req);
+
+                    client = inputRequest.getAddress();
+                    port = inputRequest.getPort();
+
+                    fileInput = new FileInputStream(file);
+                    objectInput = new ObjectInputStream(fileInput);
+
+                    Request request = (Request) objectInput.readObject();
+
+                    objectInput.close();
+                    fileInput.close();
+                    fileOutput.close();
+
+                    return request;
+                }
+
+                public void sendLetter(Request send, DatagramSocket datagramSocket) throws IOException {
+                    FileOutputStream fileOutput;
+                    FileInputStream fileInput;
+                    ObjectOutputStream objectOut;
+
+                    fileOutput = new FileOutputStream(file);
+                    objectOut = new ObjectOutputStream(fileOutput);
+
+                    objectOut.writeObject(send);
+
+                    fileInput = new FileInputStream(file);
+                    byte[] request = new byte[(int)file.length()];
+                    fileInput.read(request);
+
+                    byte[] letterSize = Useful.convertToByte(request.length);
+                    DatagramPacket i = new DatagramPacket(letterSize, letterSize.length, client, port);
+                    datagramSocket.send(i);
+
+                    DatagramPacket o = new DatagramPacket(request, request.length, client, port);
+                    datagramSocket.send(o);
+
+                    objectOut.close();
+                    fileInput.close();
+                    fileOutput.close();
+                }*/

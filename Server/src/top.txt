@@ -1,0 +1,29 @@
+show
+history
+insert test3
+Lab1
+12
+34
+105
+Lol loL
+NORMAL
+Petrov
+
+23
+45
+show
+insert new2
+Lab2
+12
+34
+105
+Kek,Kek
+NORMAL
+Misha
+2022
+3
+1
+10
+37
+23
+45
