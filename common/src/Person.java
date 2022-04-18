@@ -7,16 +7,31 @@ import java.util.Scanner;
 public class Person implements Serializable {
     private String name; //Поле не может быть null, Строка не может быть пустой
     private java.time.ZonedDateTime birthday; //Поле может быть null
-    private Integer height; //Поле не может быть null, Значение поля должно быть больше 0
+    private int height; //Поле не может быть null, Значение поля должно быть больше 0
     private long weight; //Значение поля должно быть больше 0
 
-    public Person(String name, ZonedDateTime birthday, Integer height, long weight) {
+    public Person(String name, ZonedDateTime birthday, int height, long weight) {
         this.name = name;
         this.birthday = birthday;
         this.height = height;
         this.weight = weight;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public ZonedDateTime getBirthday() {
+        return birthday;
+    }
+
+    public Integer getHeight() {
+        return height;
+    }
+
+    public long getWeight() {
+        return weight;
+    }
 
     public static Person insert() {
         java.time.ZonedDateTime birthday = null;

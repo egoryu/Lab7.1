@@ -1,6 +1,8 @@
 
 import java.io.*;
 import java.net.*;
+import java.sql.*;
+import java.util.Scanner;
 
 import static java.lang.System.exit;
 
@@ -23,6 +25,8 @@ public class Client {
 
         datagramSocket.setSoTimeout(5000);
         Transfer transfer = new Transfer(new InetSocketAddress(inetAddress, MyConstant.PORT), datagramSocket);
+        transfer.authorization();
         transfer.Start();
     }
 }
+

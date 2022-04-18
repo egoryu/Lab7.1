@@ -7,6 +7,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Scanner;
 
@@ -44,9 +45,13 @@ public class Analise {
 
         collection = Useful.lhmSort(collection);
     }
+    public void loadBase() {
+        collection = DB.readLabWork();
+    }
 
     public void startAnalise(DatagramChannel datagramSocket) throws IOException, ClassNotFoundException {
         Menu menu = new Menu();
+        boolean trigger = false;
 
         //askServer(menu);
 
@@ -60,6 +65,12 @@ public class Analise {
 
         history.addLast(request.getCommand());
         switch (request.getCommand()) {
+            case ("signup"):
+                trigger = menu.signUp(request.getLogin(), request.getPassword());
+                break;
+            case ("login"):
+                trigger = menu.logIn(request.getLogin(), request.getPassword());
+                break;
             case ("help"):
                 menu.help();
                 break;
@@ -135,13 +146,13 @@ public class Analise {
             history.poll();
 
         if (!exit)
-            sendLetter(new Request(menu.answer), datagramSocket);
+            sendLetter(new Request(menu.answer, trigger), datagramSocket);
     }
 
    public Request getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {
        FileOutputStream fileOutput;
        FileInputStream fileInput;
-       ObjectInputStream objectInput;
+       ObjectInputStream objectInput = null;
 
        ByteBuffer buffer1 = ByteBuffer.allocate(MyConstant.SIZE);
        client = datagramChannel.receive(buffer1);
@@ -151,17 +162,25 @@ public class Analise {
        buffer1.get(bytes1, 0, limits);
        int len = Useful.convertToInt(bytes1);
 
-       if (len <= 0)
+       if (len == 0) {
            return null;
+       }
+
+       if (len < 0) {
+           System.out.println(Arrays.toString(bytes1));
+           return null;
+       }
+       System.out.println();
+
        ByteBuffer buffer2;
-       byte[] bytes2 = new byte[len];
+       buffer2 = ByteBuffer.allocate(len);
+       byte[] bytes2 = new byte[buffer2.limit()];
+       datagramChannel.receive(buffer2);
+       buffer2.flip();
        try {
-           buffer2 = ByteBuffer.allocate(len);
-           datagramChannel.receive(buffer2);
-           buffer2.flip();
-           buffer2.get(bytes2, 0, len);
+           buffer2.get(bytes2, 0, buffer2.limit());
        } catch (Exception e) {
-           System.out.println("Не дошло");
+           System.out.println(buffer2);
            return null;
        }
 
@@ -173,12 +192,16 @@ public class Analise {
        if (file.length() == 0) {
            return null;
        }
-       objectInput = new ObjectInputStream(fileInput);
+       try {
+           objectInput = new ObjectInputStream(fileInput);
+       } catch (Exception e) {
+           return null;
+       }
 
        Request request = (Request) objectInput.readObject();
 
-       fileInput.close();
        objectInput.close();
+       fileInput.close();
        fileOutput.close();
 
        return request;

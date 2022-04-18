@@ -9,12 +9,12 @@ import static java.lang.System.exit;
 public class Server {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Analise analyst = new Analise();
-        if (args.length == 0) {
+        /*if (args.length == 0) {
             analyst.loadFile("");
         }
         else {
             analyst.loadFile(args[0]);
-        }
+        }*/
 
         /*DatagramSocket server = null;
         try {
@@ -37,6 +37,8 @@ public class Server {
         System.out.println("Server Started: " + iAdd);
         s.configureBlocking(false);
 
+        DB.connect(MyConstant.LOGIN, MyConstant.PASSWORD);
+        analyst.loadBase();
         while (!analyst.exit) {
             analyst.startAnalise(s);
         }

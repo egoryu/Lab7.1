@@ -10,6 +10,14 @@ public class Coordinates implements Serializable {
         this.y = y;
     }
 
+    public Float getX() {
+        return x;
+    }
+
+    public Integer getY() {
+        return y;
+    }
+
     public static Coordinates insert() {
         Scanner in = new Scanner(System.in);
         String input = "";

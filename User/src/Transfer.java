@@ -6,10 +6,12 @@ import java.util.Scanner;
 public class Transfer {
     SocketAddress address;
     DatagramSocket server;
+    private String userLogin;
+    private String userPassword;
 
     static File file = new File("trans.ser");
 
-    public Transfer(SocketAddress address, DatagramSocket server) {
+    Transfer(SocketAddress address, DatagramSocket server) {
         this.address = address;
         this.server = server;
     }
@@ -100,6 +102,71 @@ public class Transfer {
         }
     }
 
+    public void authorization() throws IOException, ClassNotFoundException {
+        Scanner in = new Scanner(System.in);
+        boolean flag = true;
+
+        while (flag) {
+            int mistake = 0;
+            String login;
+            String password;
+
+            System.out.println("Введите login, чтобы войти");
+            System.out.println("Введите signup, чтобы зарегистрироваться");
+            System.out.println("Введите exit, чтобы выйти");
+
+            String input;
+            if (!in.hasNextLine()) {
+                System.out.println("Плохой символ");
+                System.exit(0);
+            }
+            input = in.nextLine();
+
+            Request answer = null;
+            switch (input) {
+                case ("signup"):
+                case ("login"):
+                    System.out.print("Введите логин:");
+                    if (!in.hasNextLine()) {
+                        System.out.println("Плохой символ");
+                        System.exit(0);
+                    }
+                    login = in.nextLine();
+
+                    System.out.print("Введите пароль:");
+                    if (!in.hasNextLine()) {
+                        System.out.println("Плохой символ");
+                        System.exit(0);
+                    }
+                    password = in.nextLine();
+
+                    while (mistake < 4) {
+                        sendLetter(new Request(input, login, password));
+                        answer = getLetter(server);
+                        if (answer == null)
+                            mistake++;
+                        else
+                            break;
+                    }
+                    if (answer == null) {
+                        System.exit(0);
+                    }
+                    output(answer.getAnswer());
+                    if (answer.isTrigger()) {
+                        flag = false;
+                        userLogin = answer.getLogin();
+                        userPassword = answer.getPassword();
+                    }
+                    break;
+                case ("exit"):
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Неправильная команда");
+            }
+        }
+    }
+
     public void sendLetter(Request send) throws IOException {
         byte[] request;
         FileOutputStream fileOutput;
@@ -115,7 +182,7 @@ public class Transfer {
             fileInput = new FileInputStream(file);
 
             request = new byte[(int)file.length()];
-            fileInput.read(request);
+            fileInput.read(request, 0, request.length);
         } catch (Exception e) {
             System.out.println("Проблема с файлом");
             return;
@@ -128,6 +195,7 @@ public class Transfer {
         DatagramPacket o = new DatagramPacket(request, request.length, address);
         server.send(o);
 
+        objectOut.close();
         fileOutput.close();
         fileInput.close();
     }

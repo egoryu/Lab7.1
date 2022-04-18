@@ -66,8 +66,12 @@ public class Menu {
             return collection;
         }
 
-        collection.put(lhmKey, labWork);
-        answer.add("Добавлено");
+        if (DB.insertLabWork(lhmKey, labWork)) {
+            collection.put(lhmKey, labWork);
+            answer.add("Добавлено");
+        } else {
+            answer.add("Произошла ошибка");
+        }
         return collection;
     }
 
@@ -179,4 +183,38 @@ public class Menu {
         return collection;
     }
 
+    public boolean signUp(String login, String password) {
+        if (!checkLogin(login)) {
+            if (DB.signUp(login, password)) {
+                answer.add("Пользователь зарегистрирован");
+                return true;
+            } else {
+                answer.add("Пользователь не зарегистрирован");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean logIn(String login, String password) {
+        if (checkLogin(login)) {
+            if (DB.logIn(login, password)) {
+                answer.add("Вы вошли");
+                return true;
+            } else {
+                answer.add("Неправильный пароль");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkLogin(String login) {
+        if (!DB.checkLogin(login)) {
+            answer.add("Такого пользователя не существует");
+            return false;
+        }
+        answer.add("Пользователь найден");
+        return true;
+    }
 }

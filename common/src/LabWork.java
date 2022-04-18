@@ -45,6 +45,26 @@ public class LabWork implements Comparable<LabWork>, Serializable {
         lastId = Math.max(lastId + 1, this.id);
     }
 
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public ZonedDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public Person getAuthor() {
+        return author;
+    }
+
     public int getId() {
         return id;
     }

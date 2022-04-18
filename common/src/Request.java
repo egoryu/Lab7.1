@@ -2,27 +2,27 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Request implements Serializable {
-    private String command;
-    private String argument;
-    private LabWork target;
-    private ArrayList<String> answer;
-
-    Request() {
-        this.command = null;
-        this.argument = null;
-        this.target = null;
-    }
+    private String command = null;
+    private String argument = null;
+    private LabWork target = null;
+    private ArrayList<String> answer = null;
+    private String login = null;
+    private String password = null;
+    private boolean trigger = false;
 
     Request(String command) {
         this.command = command;
-        this.argument = null;
-        this.target = null;
     }
 
     Request(String command, String argument) {
         this.command = command;
         this.argument = argument;
-        this.target = null;
+    }
+
+    Request(String command, String login, String password) {
+        this.command = command;
+        this.login = login;
+        this.password = password;
     }
 
     Request(String command, String argument, LabWork target) {
@@ -31,8 +31,14 @@ public class Request implements Serializable {
         this.target = target;
     }
 
-    Request(ArrayList<String> answer) {
+    Request(ArrayList<String> answer, boolean trigger) {
         this.answer = answer;
+        this.trigger = trigger;
+    }
+
+    public void setInfo(String login, String password) {
+        this.password = password;
+        this.login = login;
     }
 
     public String getCommand() {
@@ -49,6 +55,18 @@ public class Request implements Serializable {
 
     public ArrayList<String> getAnswer() {
         return answer;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public boolean isTrigger() {
+        return trigger;
     }
 
     @Override
