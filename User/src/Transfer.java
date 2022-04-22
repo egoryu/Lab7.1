@@ -36,10 +36,13 @@ public class Transfer {
                 current = new String[]{" "};
 
             Request answer = null;
+            Request request = null;
 
             switch (current[0]) {
                 case ("exit"):
-                    sendLetter(new Request(current[0]));
+                    request = new Request(current[0]);
+                    request.setInfo(userLogin, userPassword);
+                    sendLetter(request);
                     System.exit(0);
                     break;
                 case ("help"):
@@ -50,7 +53,9 @@ public class Transfer {
                 case ("sum_of_minimal_point"):
                 case ("max_by_name"):
                     while (mistake < 4) {
-                        sendLetter(new Request(current[0]));
+                        request = new Request(current[0]);
+                        request.setInfo(userLogin, userPassword);
+                        sendLetter(request);
                         answer = getLetter(server);
                         if (answer == null)
                             mistake++;
@@ -66,7 +71,9 @@ public class Transfer {
                         continue;
                     }
                     while (mistake < 4) {
-                        sendLetter(new Request(current[0], current[1], LabWork.insert()));
+                        request = new Request(current[0], current[1], LabWork.insert());
+                        request.setInfo(userLogin, userPassword);
+                        sendLetter(request);
                         answer = getLetter(server);
                         if (answer == null)
                             mistake++;
@@ -83,7 +90,9 @@ public class Transfer {
                         continue;
                     }
                     while (mistake < 4) {
-                        sendLetter(new Request(current[0], current[1]));
+                        request = new Request(current[0], current[1]);
+                        request.setInfo(userLogin, userPassword);
+                        sendLetter(request);
                         answer = getLetter(server);
                         if (answer == null)
                             mistake++;

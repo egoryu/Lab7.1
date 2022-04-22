@@ -126,7 +126,7 @@ public class LabWork implements Comparable<LabWork>, Serializable {
                 System.out.println("Плохой символ");
                 System.exit(0);
             }
-        } while(!a.contains(input));
+        } while(!a.contains(input) && Useful.isInteger(input));
         difficulty = Difficulty.valueOf(input);
 
         return new LabWork(name, Coordinates.insert(), minimalPoint, description, difficulty, Person.insert());

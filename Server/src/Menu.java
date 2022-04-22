@@ -3,9 +3,21 @@ import java.util.*;
 
 public class Menu {
     ArrayList<String> answer;
+    private String login = "";
+
     Menu() {
         this.answer = new ArrayList<>();
     }
+
+    Menu(String login) {
+        this.answer = new ArrayList<>();
+        this.login = login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
     public void help() {
         answer.add("help: вывести справку по доступным командам");
         answer.add("info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)");
@@ -66,7 +78,7 @@ public class Menu {
             return collection;
         }
 
-        if (DB.insertLabWork(lhmKey, labWork)) {
+        if (DB.insertLabWork(lhmKey, labWork) && DB.addThing(login, labWork.getId())) {
             collection.put(lhmKey, labWork);
             answer.add("Добавлено");
         } else {
@@ -80,8 +92,16 @@ public class Menu {
             answer.add("Такого ключа нет");
             return collection;
         }
-        collection.remove(lhmKey);
-        answer.add("Удалено");
+        if (DB.accessCheck(login, collection.get(lhmKey).getId())) {
+            if (DB.removeLabwork(collection.get(lhmKey).getId())) {
+                collection.remove(lhmKey);
+                answer.add("Удалено " + lhmKey);
+            } else {
+                answer.add("Произошла ошибка "  + lhmKey);
+            }
+        } else {
+            answer.add("У вас нет прав "  + lhmKey);
+        }
         return collection;
     }
 
@@ -105,10 +125,17 @@ public class Menu {
 
         if (key[0].isEmpty()) {
             answer.add("Нет элемента с таким id");
-        }
-        else {
-            answer.add("Заменено");
-            collection.replace(key[0], labWork);
+        } else {
+            if (DB.accessCheck(login, Integer.parseInt(id))) {
+                if (DB.updateLabWork(Integer.parseInt(id), labWork)) {
+                    answer.add("Заменено");
+                    collection.replace(key[0], labWork);
+                } else {
+                    answer.add("Произошла ошибка");
+                }
+            } else {
+                answer.add("У вас нет прав");
+            }
         }
         return collection;
     }
@@ -143,12 +170,14 @@ public class Menu {
             return collection;
         }
 
-        LinkedHashMap<String, LabWork> result = new LinkedHashMap<>();
-        collection.entrySet().stream().filter(s -> s.getKey().length() >= lhmKey.length()).forEach(s -> result.put(s.getKey(), s.getValue()));
+        ArrayList<String> key = new ArrayList<>();
+        collection.entrySet().stream().filter(s -> s.getKey().length() < lhmKey.length()).forEach(s -> key.add(s.getKey()));
 
-        answer.add("Удалено");
-
-        return result;
+        for (String cur: key) {
+            collection = removeKey(collection, cur);
+        }
+        
+        return collection;
     }
 
     public LinkedHashMap<String, LabWork> replaceIfGreater(LinkedHashMap<String, LabWork> collection, String lhmKey, LabWork labWork) {
@@ -158,8 +187,16 @@ public class Menu {
         }
 
         if (collection.get(lhmKey).compareTo(labWork) < 0) {
-            collection.replace(lhmKey, collection.get(lhmKey), labWork);
-            answer.add("Заменено");
+            if (DB.accessCheck(login, collection.get(lhmKey).getId())) {
+                if (DB.updateLabWork(collection.get(lhmKey).getId(), labWork)) {
+                    collection.replace(lhmKey, collection.get(lhmKey), labWork);
+                    answer.add("Заменено");
+                } else {
+                    answer.add("Произошла ошибка");
+                }
+            } else {
+                answer.add("У вас нет прав");
+            }
         } else {
             answer.add("Замены не было");
         }

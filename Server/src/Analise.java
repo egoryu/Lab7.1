@@ -62,6 +62,7 @@ public class Analise {
         if (request.getTarget() != null) {
             request.getTarget().setId();
         }
+        menu.setLogin(request.getLogin());
 
         history.addLast(request.getCommand());
         switch (request.getCommand()) {
@@ -145,8 +146,11 @@ public class Analise {
         if (history.size() >= 12)
             history.poll();
 
-        if (!exit)
-            sendLetter(new Request(menu.answer, trigger), datagramSocket);
+        if (!exit) {
+            Request send = new Request(menu.answer, trigger);
+            send.setInfo(request.getLogin(), request.getPassword());
+            sendLetter(send, datagramSocket);
+        }
     }
 
    public Request getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {

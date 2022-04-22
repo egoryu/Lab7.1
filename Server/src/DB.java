@@ -116,4 +116,76 @@ public class DB {
             return null;
         }
     }
+
+    public static boolean accessCheck(String login, int id) {
+        String query = "SELECT count(*) from THING_TABLE where THING_ID = ? AND USER_LOGIN = ?";
+        try {
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setString(2, login);
+            pst.setInt(1, id);
+            pst.execute();
+            try (ResultSet rs = pst.getResultSet()) {
+                rs.next();
+                return rs.getInt(1) == 1;
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean removeLabwork(int id) {
+        String query = "DELETE from LABWORK_TABLE where LABWORK_ID = ?";
+        try {
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setInt(1, id);
+            pst.execute();
+            int row = pst.executeUpdate();
+            return row > 0;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean updateLabWork(int id, LabWork labWork) {
+        String query = "UPDATE LABWORK_TABLE SET LABWORK_ID = ?, LABWORK_NAME = ?, LABWORK_X = ?," +
+                " LABWORK_Y = ?, LABWORK_DATAOFCREATE = ?, LABWORK_MINIMALPOINT = ?, LABWORK_DISCRIPTION = ?," +
+                " LABWORK_DIFFICULTY = ?, LABWORK_PERSONNAME = ?, LABWORK_HEIGHT = ?, LABWORK_WEIGHT = ? WHERE LABWORK_ID = ?";
+        try {
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setInt(1, labWork.getId());
+            pst.setString(2, labWork.getName());
+            pst.setFloat(3, labWork.getCoordinates().getX());
+            pst.setInt(4, labWork.getCoordinates().getY());
+            pst.setDate(5, Date.valueOf(labWork.getCreationDate().toLocalDate()));
+            pst.setInt(6, labWork.getMinimalPoint());
+            pst.setString(7, labWork.getDescription());
+            pst.setString(8, labWork.getDifficulty().toString());
+            pst.setString(9, labWork.getAuthor().getName());
+            pst.setDouble(10, labWork.getAuthor().getHeight());
+            pst.setDouble(11, labWork.getAuthor().getWeight());
+            pst.setInt(12, id);
+            int row = pst.executeUpdate();
+            return row > 0;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean addThing(String login, int id) {
+        String query = "INSERT INTO THING_TABLE (USER_LOGIN, THING_ID) VALUES (?, ?)";
+        System.out.println(login + " " + id);
+        try {
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setString(1, login);
+            pst.setInt(2, id);
+            int row = pst.executeUpdate();
+            return row > 0;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 }
