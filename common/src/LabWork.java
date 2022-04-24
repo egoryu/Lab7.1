@@ -32,6 +32,11 @@ public class LabWork implements Comparable<LabWork>, Serializable {
         lastId = lastId + 1;
     }
 
+    public void setId(int id) {
+        this.id = id;
+        lastId = Math.max(lastId, id + 1);
+    }
+
     public LabWork(int id, String name, Coordinates coordinates, ZonedDateTime creationDate, Integer minimalPoint,
                    String description, Difficulty difficulty, Person author) {
         this.id = Math.max(lastId, id);

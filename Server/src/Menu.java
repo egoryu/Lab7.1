@@ -77,10 +77,16 @@ public class Menu {
             answer.add("Не правильный аргумент");
             return collection;
         }
+        int id = DB.insertLabWork(lhmKey, labWork);
 
-        if (DB.insertLabWork(lhmKey, labWork) && DB.addThing(login, labWork.getId())) {
-            collection.put(lhmKey, labWork);
-            answer.add("Добавлено");
+        if (id > 0) {
+            labWork.setId(id);
+            if (DB.addThing(login, labWork.getId())) {
+                collection.put(lhmKey, labWork);
+                answer.add("Добавлено");
+            } else {
+                answer.add("Произошла ошибка");
+            }
         } else {
             answer.add("Произошла ошибка");
         }
@@ -93,7 +99,7 @@ public class Menu {
             return collection;
         }
         if (DB.accessCheck(login, collection.get(lhmKey).getId())) {
-            if (DB.removeLabwork(collection.get(lhmKey).getId())) {
+            if (DB.removeLabwork(collection.get(lhmKey).getId()) && DB.removeAccess(collection.get(lhmKey).getId())) {
                 collection.remove(lhmKey);
                 answer.add("Удалено " + lhmKey);
             } else {
@@ -120,6 +126,8 @@ public class Menu {
             return collection;
         }
 
+        labWork.setId(Integer.parseInt(id));
+        
         String[] key = {""};
         collection.entrySet().stream().filter((s)-> s.getValue().getId() == Integer.parseInt(id)).forEach(s -> key[0] = s.getKey());
 
@@ -222,7 +230,9 @@ public class Menu {
 
     public boolean signUp(String login, String password) {
         if (!checkLogin(login)) {
-            if (DB.signUp(login, password)) {
+            String salt = Useful.getRandomString(5);
+            String pass = Useful.generatePassword(password, salt);
+            if (DB.signUp(login, pass, salt)) {
                 answer.add("Пользователь зарегистрирован");
                 return true;
             } else {

@@ -1,3 +1,6 @@
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class Useful {
@@ -71,5 +74,28 @@ public class Useful {
             res = 10 * res + u;
         }
         return res;
+    }
+
+    public static String generatePassword(String password, String add) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            byte[] data = (password + add).getBytes("UTF-8");
+            byte[] hashbytes = md.digest(data);
+            return Arrays.toString(hashbytes);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static String getRandomString(int length) {
+        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(62);
+            sb.append(str.charAt(number));
+        }
+        return sb.toString();
     }
 }

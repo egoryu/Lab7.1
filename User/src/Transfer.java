@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Transfer {
+    public static final String PEPPER = "Q,p83j";
     SocketAddress address;
     DatagramSocket server;
     private String userLogin;
@@ -150,7 +151,7 @@ public class Transfer {
                     password = in.nextLine();
 
                     while (mistake < 4) {
-                        sendLetter(new Request(input, login, password));
+                        sendLetter(new Request(input, login, Useful.generatePassword(password, PEPPER)));
                         answer = getLetter(server);
                         if (answer == null)
                             mistake++;
