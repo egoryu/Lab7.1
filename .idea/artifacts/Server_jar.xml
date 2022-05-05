@@ -4,6 +4,7 @@
     <root id="archive" name="Server.jar">
       <element id="module-output" name="Server" />
       <element id="module-output" name="Common" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/Telegram Desktop/postgresql-42.2.12.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

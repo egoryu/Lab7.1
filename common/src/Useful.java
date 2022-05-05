@@ -2,9 +2,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Useful {
-    public static LinkedHashMap<String, LabWork> lhmSort(LinkedHashMap<String, LabWork> collection) {
+    public static ConcurrentHashMap<String, LabWork> lhmSort(ConcurrentHashMap<String, LabWork> collection) {
         if (collection.isEmpty()) {
             return collection;
         }
@@ -18,7 +19,7 @@ public class Useful {
             }
         });
 
-        LinkedHashMap<String, LabWork> sortedMap = new LinkedHashMap<>();
+        ConcurrentHashMap<String, LabWork> sortedMap = new ConcurrentHashMap<>();
 
         for (Map.Entry<String, LabWork> entry : entries) {
             sortedMap.put(entry.getKey(), entry.getValue());

@@ -4,10 +4,11 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class IO {
-    public static LinkedHashMap<String, LabWork> Read(String name, char del) {
-        LinkedHashMap<String, LabWork> collection = new LinkedHashMap<>();
+public class FileIO {
+    public static ConcurrentHashMap<String, LabWork> Read(String name, char del) {
+        ConcurrentHashMap<String, LabWork> collection = new ConcurrentHashMap<>();
         InputStreamReader reader;
         try {
             reader = new InputStreamReader(
@@ -116,7 +117,7 @@ public class IO {
         return collection;
     }
 
-    public static void Write(LinkedHashMap<String, LabWork> collection, String name, char del) throws IOException {
+    public static void Write(ConcurrentHashMap<String, LabWork> collection, String name, char del) throws IOException {
         OutputStreamWriter writer;
         try {
             writer = new OutputStreamWriter(

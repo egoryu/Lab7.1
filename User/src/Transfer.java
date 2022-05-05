@@ -41,9 +41,9 @@ public class Transfer {
 
             switch (current[0]) {
                 case ("exit"):
-                    request = new Request(current[0]);
+                    /*request = new Request(current[0]);
                     request.setInfo(userLogin, userPassword);
-                    sendLetter(request);
+                    sendLetter(request);*/
                     System.exit(0);
                     break;
                 case ("help"):
@@ -198,9 +198,9 @@ public class Transfer {
             return;
         }
 
-        byte[] letterSize = Useful.convertToByte(request.length);
-        DatagramPacket i = new DatagramPacket(letterSize, letterSize.length, address);
-        server.send(i);
+        /*byte[] letterSize = Useful.convertToByte(request.length);
+        DatagramPacket i = new DatagramPacket(letterSize, MyConstant.SIZE, address);
+        server.send(i);*/
 
         DatagramPacket o = new DatagramPacket(request, request.length, address);
         server.send(o);

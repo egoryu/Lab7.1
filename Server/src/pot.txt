@@ -1,4 +1,3 @@
-execute_script C:\Users\egorn\Documents\ИТМО\1_курс\Програмировани\Lab6\Server\src\top.txt
 show
 history
 insert test1

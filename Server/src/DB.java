@@ -1,18 +1,21 @@
 import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DB {
     private static Connection connection = null;
 
     public static boolean connect(String login, String password) {
         try {
-            if (connection == null)
+            if (connection == null) {
+                Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection(MyConstant.URL, login, password);
+            }
             return true;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println(e.getMessage() + "lol");
+            e.printStackTrace();
             return false;
         }
     }
@@ -110,8 +113,8 @@ public class DB {
         }
     }
 
-    public static LinkedHashMap<String, LabWork> readLabWork() {
-        LinkedHashMap<String, LabWork> collection = new LinkedHashMap<>();
+    public static ConcurrentHashMap<String, LabWork> readLabWork() {
+        ConcurrentHashMap<String, LabWork> collection = new ConcurrentHashMap<>();
         String query = "SELECT * FROM LABWORK_TABLE";
         try {
             PreparedStatement pst = connection.prepareStatement(query);

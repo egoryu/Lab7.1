@@ -7,12 +7,13 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Script {
     public static ArrayList<String> scriptHistory = new ArrayList<>();
     ArrayList<String> answer = new ArrayList<>();
 
-    public LinkedHashMap<String, LabWork> makeScript(LinkedHashMap<String, LabWork> collection, String script, String saveFile) {
+    public ConcurrentHashMap<String, LabWork> makeScript(ConcurrentHashMap<String, LabWork> collection, String script, String saveFile) {
         if (scriptHistory.contains(script)) {
             answer.add("Образовался цикл из команд");
             scriptHistory.remove(script);

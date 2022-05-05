@@ -4,6 +4,7 @@
     <root id="archive" name="User.jar">
       <element id="module-output" name="User" />
       <element id="module-output" name="Common" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/postgresql-42.3.3.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
