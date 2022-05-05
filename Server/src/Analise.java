@@ -7,18 +7,48 @@ import java.nio.channels.DatagramChannel;
 import java.util.ArrayDeque;
         import java.util.concurrent.ConcurrentHashMap;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Analise {
-     volatile ConcurrentHashMap<String, LabWork> collection = new ConcurrentHashMap<>();
+    private static Analise analise;
+
+    volatile ConcurrentHashMap<String, LabWork> collection = new ConcurrentHashMap<>();
     Scanner in = new Scanner(System.in);
     String nameOfSaveFile = "";
     ArrayDeque<String> history = new ArrayDeque<>();
     volatile public boolean exit = false;
     SocketAddress client;
     static File file;
+    //Поток на ввод
+    ThreadPoolExecutor executor1 = null;
+    //Поток на обработку
+    ThreadPoolExecutor executor2 = null;
+    //Поток на вывод
+    ThreadPoolExecutor executor3 = null;
 
-    static {
+    private Analise() {
+        executor1 = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        executor2 = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+        executor3 = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+
         file = new File("analise1.ser");
+    }
+
+    public static Analise getAnalise() {
+        if (analise == null) {
+            analise = new Analise();
+        }
+        return analise;
+    }
+
+    public void setExit(boolean exit) {
+        this.exit = exit;
+    }
+
+    public boolean isExit() {
+        return exit;
     }
 
     public void loadFile(String nameOfFile) {
@@ -45,20 +75,20 @@ public class Analise {
         collection = DB.readLabWork();
     }
 
-    public Request startAnalise(DatagramChannel datagramSocket, Answer answer) throws IOException, ClassNotFoundException {
+    public void startAnalise(DatagramChannel datagramChannel, Answer answer) throws IOException, ClassNotFoundException {
         Menu menu = new Menu();
         boolean trigger = false;
 
         //askServer(menu);
 
-        //Request request = getLetter(datagramSocket);
+        //Request request = getLetter(datagramChannel);
         if (answer == null)
-            return null;
+            return;
         Request request = answer.getRequest();
         client = answer.getClient();
 
         if (request == null)
-            return null;
+            return;
         if (request.getTarget() != null) {
             request.getTarget().setId();
         }
@@ -149,74 +179,19 @@ public class Analise {
         if (!exit) {
             Request send = new Request(menu.answer, trigger);
             send.setInfo(request.getLogin(), request.getPassword());
-            //sendLetter(send, datagramSocket);
-            return send;
-        } else {
-            return null;
+            //sendLetter(send, datagramChannel);
+            Runnable sender = () -> {
+                try {
+                    Analise.getAnalise().sendLetter(send, datagramChannel);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            };
+            executor3.submit(sender);
         }
     }
 
-   /*public Answer getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {
-       FileOutputStream fileOutput;
-       FileInputStream fileInput;
-       ObjectInputStream objectInput = null;
-
-       ByteBuffer buffer1 = ByteBuffer.allocate(MyConstant.SIZE);
-       SocketAddress client = datagramChannel.receive(buffer1);
-       if (client == null)
-           return null;
-       buffer1.flip();
-       int limits = buffer1.limit();
-       byte bytes1[] = new byte[limits];
-       buffer1.get(bytes1, 0, limits);
-       int len = Useful.convertToInt(bytes1);
-
-       if (len == 0) {
-           return null;
-       }
-
-       if (len < 0) {
-           System.out.println(Arrays.toString(bytes1));
-           return null;
-       }
-       System.out.println();
-
-       ByteBuffer buffer2;
-       buffer2 = ByteBuffer.allocate(len);
-       byte[] bytes2 = new byte[buffer2.limit()];
-       datagramChannel.receive(buffer2);
-       buffer2.flip();
-       try {
-           buffer2.get(bytes2, 0, buffer2.limit());
-       } catch (Exception e) {
-           System.out.println(buffer2);
-           return null;
-       }
-
-       fileOutput = new FileOutputStream(file);
-
-       fileOutput.write(bytes2);
-
-       fileInput = new FileInputStream(file);
-       if (file.length() == 0) {
-           return null;
-       }
-       try {
-           objectInput = new ObjectInputStream(fileInput);
-       } catch (Exception e) {
-           return null;
-       }
-
-       Request request = (Request) objectInput.readObject();
-
-       objectInput.close();
-       fileInput.close();
-       fileOutput.close();
-
-       return new Answer(request, client);
-   }*/
-
-    public Answer getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {
+    public void getLetter(DatagramChannel datagramChannel) throws IOException, ClassNotFoundException {
         FileOutputStream fileOutput;
         FileInputStream fileInput;
         ObjectInputStream objectInput = null;
@@ -224,7 +199,7 @@ public class Analise {
         ByteBuffer buffer1 = ByteBuffer.allocate(MyConstant.SIZE * 1000);
         SocketAddress client = datagramChannel.receive(buffer1);
         if (client == null)
-            return null;
+            return;
         buffer1.flip();
         int limits = buffer1.limit();
         byte[] bytes1 = new byte[limits];
@@ -236,12 +211,12 @@ public class Analise {
 
         fileInput = new FileInputStream(file);
         if (file.length() == 0) {
-            return null;
+            return;
         }
         try {
             objectInput = new ObjectInputStream(fileInput);
         } catch (Exception e) {
-            return null;
+            return;
         }
 
         Request request = (Request) objectInput.readObject();
@@ -250,7 +225,15 @@ public class Analise {
         fileInput.close();
         fileOutput.close();
 
-        return new Answer(request, client);
+        Runnable execute = () -> {
+            try {
+                Analise.getAnalise().startAnalise(datagramChannel, new Answer(request, client));
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        };
+
+        executor2.submit(execute);
     }
 
     public void sendLetter(Request send, DatagramChannel datagramChannel) throws IOException {
@@ -276,5 +259,11 @@ public class Analise {
         objectOut.close();
         fileInput.close();
         fileOutput.close();
+    }
+
+    public void close() {
+        executor1.shutdownNow();
+        executor2.shutdownNow();
+        executor3.shutdownNow();
     }
 }

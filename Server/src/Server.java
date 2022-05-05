@@ -12,7 +12,7 @@ import static java.lang.System.exit;
 public class Server {
     public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
-        Analise analyst = new Analise();
+        Analise analyst = Analise.getAnalise();
         DatagramChannel server = null;
         try {
             server = DatagramChannel.open();
@@ -43,85 +43,29 @@ public class Server {
         }
         analyst.loadBase();
 
-        Exit exit = new Exit(analyst);
+        Exit exit = new Exit();
         exit.start();
 
-        //Поток на ввод
-        ThreadPoolExecutor executor1 = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        //Поток на обработку
-        ThreadPoolExecutor executor2 = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-        //Поток на вывод
-        ThreadPoolExecutor executor3 = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-
-        while (!analyst.exit) {
-            //Список на будущие полученные значения
-            List<Future<Answer>> resultList = new ArrayList<>();
-            //Полученные значения
-            List<Answer> getter = new ArrayList<>();
-            //Список на будущие обработанные значения
-            List<Future<Request>> resultList1 = new ArrayList<>();
-            //Обработанные значения
-            List<Request> getter1 = new ArrayList<>();
-
+        while (!Analise.getAnalise().isExit()) {
             //Посылка задач на ввод
             DatagramChannel finalServer = server;
-            Callable<Answer> input = () -> analyst.getLetter(finalServer);
-            for(int i = 0; i < 10; i++) {
-                Future<Answer> result = executor1.submit(input);
-                resultList.add(result);
-            }
-
-            //Получения результатов с ввода
-            for (Future<Answer> result : resultList) {
-                Answer current = null;
+            Runnable input = () -> {
                 try {
-                    current = result.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    System.out.println(e.getMessage());
-                }
-                if (current == null)
-                    continue;
-                getter.add(current);
-            }
-
-            //Посылка задач на выполнение
-            for (Answer request : getter) {
-                DatagramChannel finalServer1 = server;
-                Callable<Request> execute = () -> analyst.startAnalise(finalServer1, request);
-
-                Future<Request> ans = executor2.submit(execute);
-                resultList1.add(ans);
-            }
-
-            //Получение результатов обработки
-            for (Future<Request> request:resultList1) {
-                Request temp = null;
-                try {
-                    temp = request.get();
-                } catch (InterruptedException | ExecutionException e) {
+                    analyst.getLetter(finalServer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                if (temp == null)
-                    continue;
-                getter1.add(temp);
-            }
-
-            //Отправка ответа
-            for (Request cur:getter1) {
-                Runnable menu = () -> {
-                    try {
-                        analyst.sendLetter(cur, finalServer);
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage());
-                    }
-                };
-                executor3.submit(menu);
+            };
+            analyst.executor1.submit(input);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        executor3.shutdownNow();
-        executor2.shutdownNow();
-        executor1.shutdownNow();
-
+        Analise.getAnalise().close();
         server.close();
     }
 }
